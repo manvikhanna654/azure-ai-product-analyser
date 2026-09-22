@@ -30,6 +30,21 @@ The application can:
 - [Development guide](#development-guide)
 - [Limitations and safe-use notes](#limitations-and-safe-use-notes)
 
+## Quick workflow
+
+```mermaid
+flowchart LR
+    A[Upload product image] --> B[Validate image]
+    B --> C[Analyze with Microsoft Foundry]
+    C --> D[View structured insights]
+    D --> E{Next action}
+    E --> F[Ask about product]
+    E --> G[Search current prices]
+    E --> H[Save in session history]
+    F --> I[Image answer or web answer]
+    G --> J[Comparable or exact-match results]
+```
+
 ## How the application works
 
 The application has four main user areas:
