@@ -321,6 +321,115 @@ hr, [data-testid="stDivider"] { border-color: var(--border); }
   .pv-hero h2 { font-size: 1.6rem; }
   .pv-header { flex-direction: column; gap: .9rem; }
 }
+@media (max-width: 640px) {
+  /* Keep every element inside the phone viewport. */
+  .block-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem .75rem 2.5rem .75rem !important;
+  }
+  [data-testid="stAppViewContainer"] {
+    overflow-x: hidden;
+  }
+
+  /* Streamlit columns become single-column sections on small screens. */
+  [data-testid="stHorizontalBlock"] {
+    flex-wrap: wrap !important;
+    gap: .75rem !important;
+  }
+  [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .pv-header {
+    gap: .65rem;
+    padding-bottom: .85rem;
+    margin-bottom: 1.1rem;
+  }
+  .pv-header h1 {
+    font-size: 1.35rem;
+    line-height: 1.2;
+  }
+  .pv-header p { font-size: .82rem; line-height: 1.45; }
+  .pv-header-meta { width: 100%; flex-wrap: wrap; }
+
+  .pv-hero {
+    padding: 1.35rem 1rem;
+    border-radius: 16px;
+  }
+  .pv-hero:after { display: none; }
+  .pv-hero h2 {
+    font-size: 1.65rem;
+    line-height: 1.12;
+    max-width: none;
+  }
+  .pv-hero p { font-size: .86rem; }
+
+  .pv-card {
+    min-width: 0;
+    padding: .95rem 1rem;
+    border-radius: 12px;
+  }
+  .pv-card:hover {
+    transform: none;
+  }
+  .pv-section-title { font-size: 1rem; }
+  .pv-section-sub { font-size: .8rem; line-height: 1.4; }
+
+  .pv-row {
+    align-items: flex-start;
+    gap: .75rem;
+  }
+  .pv-row .k { flex: 0 0 36%; }
+  .pv-row .v {
+    min-width: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  .pv-pill {
+    white-space: normal;
+    line-height: 1.25;
+    padding: .35rem .65rem;
+  }
+  .pv-chip { max-width: 100%; overflow-wrap: anywhere; }
+
+  /* Make primary actions easy to tap and readable on small screens. */
+  .stButton > button,
+  .stDownloadButton > button {
+    min-height: 2.75rem;
+    width: 100%;
+    white-space: normal;
+    line-height: 1.25;
+    padding: .65rem .8rem;
+  }
+  .stTextInput input {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+  [data-testid="stFileUploaderDropzone"] {
+    padding: 1.35rem .8rem;
+  }
+  [data-testid="stFileUploaderDropzoneInstructions"] {
+    text-align: center;
+  }
+  [data-testid="stImage"] img,
+  .pv-thumb {
+    max-width: 100%;
+    height: auto !important;
+  }
+
+  /* Chat messages use the full available width on phones. */
+  .pv-msg.user,
+  .pv-msg.ai {
+    margin-left: 0;
+    margin-right: 0;
+    padding: .75rem .8rem;
+    font-size: .84rem;
+  }
+  .pv-empty { padding: 2.4rem 1rem; }
+}
 </style>
 """
 
