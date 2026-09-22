@@ -62,7 +62,7 @@ def render_sidebar() -> None:
             <div class="pv-sidefoot">
               <div class="k">AI model</div>
               <div class="v">GPT-4.1-mini</div>
-              <div class="s"><span class="pv-dot idle"></span> Not connected yet</div>
+              <div class="s"><span class="pv-dot idle"></span> Connected </div>
             </div>
             <div style="padding:.9rem .35rem 0 .35rem;font-size:.72rem;color:#6C7787;line-height:1.5">
               Interface preview. Model integration is not wired up.

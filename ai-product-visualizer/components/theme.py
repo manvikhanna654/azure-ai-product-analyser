@@ -284,6 +284,20 @@ p, span, li, label { color: var(--text); }
 .stTextInput input::placeholder { color: #6C7787; }
 .stTextInput input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,92,255,.14); }
 
+/* Streamlit's newer uploader can render its internal label twice on narrow
+   screens. Hide the internal text and provide one stable visible label while
+   keeping the native button and file-picker behavior intact. */
+[data-testid="stFileUploaderDropzone"] button {
+  text-indent: -9999px !important;
+  line-height: 0 !important;
+}
+[data-testid="stFileUploaderDropzone"] button::after {
+  content: "Upload";
+  display: inline-block;
+  text-indent: 0;
+  line-height: 1.25;
+}
+
 /* --- images --- */
 [data-testid="stImage"] img, .pv-thumb {
   border-radius: 12px; border: 1px solid var(--border);
