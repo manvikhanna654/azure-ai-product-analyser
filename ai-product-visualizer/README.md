@@ -11,6 +11,19 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+Before running the app, copy `.env.example` to `.env` and set your Microsoft
+Foundry project endpoint and API key:
+
+```env
+FOUNDRY_PROJECT_ENDPOINT=https://your-resource.services.ai.azure.com/api/projects/your-project
+FOUNDRY_API_KEY=your_api_key
+FOUNDRY_MODEL=gpt-4.1-mini
+```
+
+The app sends uploaded JPG, PNG, or WebP images to the Foundry Responses API
+using the OpenAI-compatible client. The API key stays server-side and is never
+shown in the UI.
+
 ## Structure
 
 ```

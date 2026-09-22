@@ -10,9 +10,10 @@ def render_dashboard() -> None:
     st.markdown(
         """
         <div class="pv-hero">
-          <h2>Understand your product instantly.</h2>
-          <p>Upload a product image and let AI identify its visual attributes,
-          describe the product, and answer questions about it.</p>
+          <div class="pv-eyebrow">AI-powered product intelligence</div>
+          <h2>Turn product images into sharper decisions.</h2>
+          <p>Give your ecommerce team a faster way to understand products, create better copy,
+          and move from visual input to useful marketing insight.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -72,7 +73,7 @@ def render_dashboard() -> None:
                 <div class="pv-card">
                   <div style="display:flex;gap:.8rem;align-items:center">
                     <img class="pv-thumb" style="width:44px;height:44px;object-fit:cover"
-                         src="{media.image_data_uri(media.placeholder_image(item['tint'], 120))}"/>
+                         src="{item.get('image_url') or media.image_data_uri(media.placeholder_image(item['tint'], 120, item['name']))}"/>
                     <div>
                       <h4 style="margin:0">{item['name']}</h4>
                       <p style="margin-top:.2rem">{item['category']} &middot; {item['date']}</p>

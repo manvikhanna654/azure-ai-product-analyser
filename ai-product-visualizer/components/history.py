@@ -39,7 +39,7 @@ def render_history() -> None:
                     f"""
                     <div class="pv-card" style="padding:0;overflow:hidden">
                       <img style="width:100%;height:140px;object-fit:cover;display:block"
-                           src="{media.image_data_uri(media.placeholder_image(item['tint'], 360))}"/>
+                           src="{item.get('image_url') or media.image_data_uri(media.placeholder_image(item['tint'], 360, item['name']))}"/>
                       <div style="padding:1rem 1.15rem 1.15rem 1.15rem">
                         <h4 style="margin:0">{item['name']}</h4>
                         <p style="margin-top:.3rem">{item['category']}</p>

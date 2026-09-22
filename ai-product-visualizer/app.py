@@ -43,8 +43,8 @@ HEADINGS = {
 
 
 def main() -> None:
-    theme.inject_css()
     init_state()
+    theme.inject_css()
     render_sidebar()
 
     page = st.session_state.page

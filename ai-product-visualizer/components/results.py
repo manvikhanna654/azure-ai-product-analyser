@@ -5,6 +5,7 @@ import streamlit as st
 from components import media, theme
 from components.qa import render_qa
 from components.state import reset_analysis
+from services.ai_service import search_product_prices
 
 
 def _attribute_card(title: str, body_html: str) -> str:
@@ -17,6 +18,15 @@ def _attribute_card(title: str, body_html: str) -> str:
 def render_results() -> None:
     analysis = st.session_state.analysis
     overview = analysis["overview"]
+    identity = analysis.get("identity", {})
+    if not identity:
+        identity = {
+            "brand": "",
+            "product_name": overview.get("Product Type", ""),
+            "model_number": "",
+            "variant": overview.get("Primary Color", ""),
+            "specifications": [],
+        }
     attrs = analysis["attributes"]
     conf = analysis["confidence"]
 
@@ -43,6 +53,27 @@ def render_results() -> None:
     with right:
         theme.section("Product overview", eyebrow="Summary")
         theme.rows(overview.items())
+        if identity:
+            theme.spacer(0.6)
+            theme.section("Product identity", "Review or correct these details before searching the market.", eyebrow="Search matching")
+            identity_key = (st.session_state.analysis_source or "sample").replace(" ", "_")
+            brand = st.text_input("Brand", value=identity.get("brand", ""), key=f"identity_brand_{identity_key}")
+            product_name = st.text_input("Product name", value=identity.get("product_name", ""), key=f"identity_product_{identity_key}")
+            model_number = st.text_input("Model number", value=identity.get("model_number", ""), key=f"identity_model_{identity_key}", placeholder="Leave blank if not visible")
+            variant = st.text_input("Variant", value=identity.get("variant", ""), key=f"identity_variant_{identity_key}")
+            specifications_text = st.text_input(
+                "Visible specifications",
+                value=", ".join(identity.get("specifications", [])),
+                key=f"identity_specs_{identity_key}",
+                help="Optional: storage, size, colorway, capacity, or other visible details.",
+            )
+            identity = {
+                "brand": brand.strip(),
+                "product_name": product_name.strip(),
+                "model_number": model_number.strip(),
+                "variant": variant.strip(),
+                "specifications": [item.strip() for item in specifications_text.split(",") if item.strip()],
+            }
         theme.spacer(0.7)
 
         st.markdown(
@@ -101,12 +132,45 @@ def render_results() -> None:
             {analysis['description']}
           </p>
           <div style="margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--border)">
-            <span class="pv-pill">Placeholder text &mdash; model not connected</span>
+              <span class="pv-pill">Generated from the configured Foundry model</span>
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+    confident, unknown = st.columns(2, gap="medium")
+    with confident:
+        items = analysis.get("confidently_identified", [])
+        st.markdown(_attribute_card("Confidently identified", theme.chips(items) or "None"), unsafe_allow_html=True)
+    with unknown:
+        items = analysis.get("cannot_determine", [])
+        st.markdown(_attribute_card("Cannot determine", theme.chips(items) or "None"), unsafe_allow_html=True)
+
+    theme.spacer(1.2)
+    theme.section("Current market prices", "Search the web for prices and comparable products.")
+    location = st.text_input(
+        "Market or location",
+        value="India",
+        key="price_location",
+        help="Prices and availability vary by country and location.",
+    )
+    exact_identity_ready = all(identity.get(field) for field in ("brand", "product_name", "model_number"))
+    if exact_identity_ready:
+        st.success("Exact-match search ready: brand, product name, and model number are available.")
+    else:
+        st.warning("The model number is not verified. Results will be comparable products, not confirmed exact matches.")
+
+    if st.button("Search current prices", type="primary", disabled=not identity.get("product_name")):
+        with st.spinner("Searching current prices..."):
+            try:
+                st.session_state.web_search_result = search_product_prices(
+                    identity, location, exact_match=exact_identity_ready
+                )
+            except Exception as exc:
+                st.session_state.web_search_result = f"Web search failed: {exc}"
+    if st.session_state.web_search_result:
+        st.markdown(st.session_state.web_search_result)
 
     theme.spacer(2.0)
     render_qa()

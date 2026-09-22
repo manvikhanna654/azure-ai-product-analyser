@@ -46,6 +46,17 @@ def render_sidebar() -> None:
 
         st.markdown('<div style="height:1.1rem"></div>', unsafe_allow_html=True)
 
+        is_light = st.session_state.theme_mode == "light"
+        if st.toggle("Light theme", value=is_light, key="theme_toggle"):
+            if st.session_state.theme_mode != "light":
+                st.session_state.theme_mode = "light"
+                st.rerun()
+        elif st.session_state.theme_mode != "dark":
+            st.session_state.theme_mode = "dark"
+            st.rerun()
+        if st.session_state.theme_mode == "light":
+            st.markdown('<span class="pv-light-marker"></span>', unsafe_allow_html=True)
+
         st.markdown(
             """
             <div class="pv-sidefoot">

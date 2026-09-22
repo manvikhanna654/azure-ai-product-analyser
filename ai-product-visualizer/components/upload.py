@@ -1,15 +1,14 @@
 """Upload step of the Analyze Product page."""
 
-import time
-
 import streamlit as st
 from PIL import Image
 
 from components import theme
-from data.mock_data import SAMPLE_ANALYSIS, new_history_entry
+from data.mock_data import new_history_entry
+from services.ai_service import analyze_product
 
 MAX_MB = 10
-ACCEPTED = ["jpg", "jpeg", "png"]
+ACCEPTED = ["jpg", "jpeg", "png", "webp"]
 
 
 def _readable_size(num_bytes: int) -> str:
@@ -99,19 +98,24 @@ def render_upload() -> None:
         theme.spacer(0.8)
 
         if st.button("Analyze product", type="primary", **theme.STRETCH):
-            _run_analysis(upload.name)
+            _run_analysis(upload.name, upload.getvalue(), upload.type)
 
-        st.caption("Results are layout previews until the model is connected.")
+        st.caption("The image will be analyzed by your configured Foundry model.")
 
 
-def _run_analysis(file_name: str) -> None:
-    """Placeholder for the call that will later return a real analysis."""
+def _run_analysis(file_name: str, image_bytes: bytes, mime_type: str) -> None:
+    """Send the uploaded image to Microsoft Foundry."""
     with st.spinner("Analyzing product..."):
-        time.sleep(1.6)
+        try:
+            analysis = analyze_product(image_bytes, mime_type)
+        except Exception as exc:
+            st.error(f"Could not analyze the image: {exc}")
+            return
 
-    analysis = SAMPLE_ANALYSIS
     st.session_state.analysis = analysis
     st.session_state.analysis_source = file_name
+    st.session_state.upload_bytes = image_bytes
+    st.session_state.upload_mime = mime_type
     st.session_state.qa = []
     st.session_state.history.insert(
         0, new_history_entry(analysis["overview"]["Product Type"], analysis)

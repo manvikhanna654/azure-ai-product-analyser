@@ -91,6 +91,7 @@ SAMPLE_HISTORY = [
         "category": "Footwear",
         "date": "18 Sep 2026",
         "tint": "#8A93A3",
+        "image_url": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=900&q=85",
         "analysis": SAMPLE_ANALYSIS,
     },
     {
@@ -99,6 +100,7 @@ SAMPLE_HISTORY = [
         "category": "Kitchenware",
         "date": "16 Sep 2026",
         "tint": "#C9A27A",
+        "image_url": "https://www.publicgoods.com/cdn/shop/files/pour_over_coffee_maker_lifestyle_01.jpg?v=1752895636",
         "analysis": SAMPLE_ANALYSIS,
     },
     {
@@ -107,6 +109,7 @@ SAMPLE_HISTORY = [
         "category": "Bags & luggage",
         "date": "12 Sep 2026",
         "tint": "#6F8A72",
+        "image_url": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=85",
         "analysis": SAMPLE_ANALYSIS,
     },
     {
@@ -115,6 +118,7 @@ SAMPLE_HISTORY = [
         "category": "Electronics",
         "date": "09 Sep 2026",
         "tint": "#7C5CFF",
+        "image_url": "https://images.unsplash.com/photo-1599955051125-571f47e04316?auto=format&fit=crop&w=900&q=85",
         "analysis": SAMPLE_ANALYSIS,
     },
 ]
