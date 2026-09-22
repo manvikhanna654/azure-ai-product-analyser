@@ -276,23 +276,6 @@ p, span, li, label { color: var(--text); }
 [data-testid="stSidebar"] [data-testid="stToggle"] { margin: .35rem .35rem .6rem; }
 [data-testid="stSidebar"] [data-testid="stToggle"] label { color: var(--muted); font-size: .78rem; }
 
-/* --- file uploader --- */
-[data-testid="stFileUploaderDropzone"] {
-  background: var(--bg-alt); border: 1.5px dashed var(--border);
-  border-radius: var(--radius); padding: 2.4rem 1.5rem;
-  transition: border-color .18s ease, background .18s ease;
-}
-[data-testid="stFileUploaderDropzone"]:hover {
-  border-color: rgba(124,92,255,.55); background: #131A23;
-}
-[data-testid="stFileUploaderDropzone"] small { color: var(--muted); }
-[data-testid="stFileUploaderDropzone"] button {
-  background: var(--card); border: 1px solid var(--border);
-  color: var(--text); border-radius: 9px;
-}
-[data-testid="stFileUploaderDropzone"] button:hover { border-color: var(--accent); color: var(--text); }
-[data-testid="stFileUploaderFile"] { color: var(--muted); }
-
 /* --- inputs --- */
 .stTextInput input {
   background: var(--card); border: 1px solid var(--border);
@@ -407,35 +390,6 @@ hr, [data-testid="stDivider"] { border-color: var(--border); }
   .stTextInput input {
     min-height: 2.75rem;
     font-size: 1rem;
-  }
-  [data-testid="stFileUploaderDropzone"] {
-    padding: 1.35rem .8rem;
-  }
-  [data-testid="stFileUploaderDropzone"] > div,
-  [data-testid="stFileUploaderDropzone"] section {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: .65rem !important;
-    width: 100% !important;
-  }
-  [data-testid="stFileUploaderDropzoneInstructions"] {
-    display: block !important;
-    width: 100% !important;
-    text-align: center;
-  }
-  [data-testid="stFileUploaderDropzone"] button {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: auto !important;
-    min-width: 8.5rem !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
   }
   [data-testid="stImage"] img,
   .pv-thumb {
