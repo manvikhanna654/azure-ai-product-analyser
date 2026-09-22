@@ -18,6 +18,7 @@ The application can:
 
 - [How the application works](#how-the-application-works)
 - [Workflow](#workflow)
+- [Detailed project walkthrough](#detailed-project-walkthrough)
 - [Architecture](#architecture)
 - [Project structure](#project-structure)
 - [Requirements](#requirements)
@@ -130,6 +131,237 @@ flowchart LR
     F --> G
     C --> G
 ```
+
+## Detailed project walkthrough
+
+This section describes the complete runtime workflow in the order a user, presenter, or developer can explain it.
+
+### Phase 1: Application startup
+
+1. Streamlit starts `app.py`.
+2. `st.set_page_config()` sets the page title, icon, wide layout, and expanded sidebar.
+3. `main()` calls `init_state()` from `components/state.py`.
+4. `init_state()` creates the per-user session values used by the application, including:
+   - Current page.
+   - Current uploaded image.
+   - Uploaded image bytes and MIME type.
+   - Current analysis result.
+   - Analysis source filename.
+   - Q&A messages.
+   - Price-search result.
+   - History entries.
+   - Theme mode and toast messages.
+5. `theme.inject_css()` applies the custom visual design.
+6. `render_sidebar()` displays navigation and the theme control.
+7. `render_header()` displays the title and subtitle for the selected page.
+8. `app.py` routes to the selected page renderer.
+
+```mermaid
+flowchart TD
+    A[streamlit run app.py] --> B[set page configuration]
+    B --> C[initialize session state]
+    C --> D[inject theme CSS]
+    D --> E[render sidebar]
+    E --> F[render page header]
+    F --> G{Current page}
+    G --> H[Dashboard]
+    G --> I[Analyze Product]
+    G --> J[History]
+    G --> K[About]
+```
+
+### Phase 2: Dashboard and navigation
+
+The Dashboard is the starting page. It explains the product-analysis experience and provides actions to begin a new analysis or view session history.
+
+Navigation is controlled by `st.session_state.page`. When the user clicks a sidebar item, `components/sidebar.py` updates that value and Streamlit reruns the script. On the next rerun, `app.py` renders the selected page.
+
+Important Streamlit behavior: a button click causes a rerun from the top of `app.py`. The application therefore stores important values in `st.session_state` instead of relying on local variables from a previous run.
+
+### Phase 3: Image upload and validation
+
+The upload page is rendered by `components/upload.py`.
+
+1. The user opens **Analyze Product**.
+2. `st.file_uploader()` accepts JPG, JPEG, PNG, and WebP files.
+3. The uploaded file is checked against the 10 MB limit.
+4. Pillow opens the file and loads the image to confirm it is readable.
+5. The image is saved to `st.session_state.upload` for preview.
+6. The interface displays the filename, dimensions, file size, format, and image preview.
+7. The **Analyze product** button becomes available.
+
+If validation fails, the app displays an error and stops before making an external API request.
+
+### Phase 4: AI image analysis
+
+When the user clicks **Analyze product**, `_run_analysis()` in `components/upload.py` performs the following steps:
+
+1. Reads the uploaded file bytes and MIME type.
+2. Calls `analyze_product()` in `services/ai_service.py`.
+3. Reads `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_API_KEY`, and `FOUNDRY_MODEL`.
+4. Normalizes the project endpoint so it ends in `/openai/v1`.
+5. Creates an OpenAI-compatible client pointed at the Microsoft Foundry project endpoint.
+6. Encodes the image as a base64 data URL.
+7. Sends the image, analysis instructions, and strict JSON schema to the Foundry Responses API.
+8. The model analyzes only visible evidence and returns structured JSON.
+9. The service parses the response using `json.loads()`.
+10. If parsing fails, the user receives an error instead of an incomplete result.
+11. On success, the result is stored in session state.
+12. The uploaded bytes and MIME type are retained for later image-based Q&A.
+13. A history entry is inserted at the beginning of the current session history.
+14. The app triggers a rerun and displays the Results page.
+
+The main analysis function is:
+
+```text
+analyze_product(image_bytes, mime_type) -> analysis dictionary
+```
+
+The result must contain `overview`, `identity`, `attributes`, `description`, `confidence`, `confidently_identified`, and `cannot_determine`.
+
+### Phase 5: Results rendering
+
+The Results page is rendered by `components/results.py`.
+
+1. The stored analysis is read from `st.session_state.analysis`.
+2. The source image is displayed.
+3. The overview is rendered as key-value rows.
+4. Identity fields are shown as editable inputs:
+   - Brand.
+   - Product name.
+   - Model number.
+   - Variant.
+   - Visible specifications.
+5. The confidence label and score are displayed with a visual meter.
+6. Visual attributes are rendered as chips and color swatches.
+7. The generated description is displayed.
+8. The application separates confidently identified information from information it cannot determine.
+9. The market-price search section is displayed.
+10. The Q&A panel is displayed below the result.
+
+The user can correct identity fields before performing a market search. This creates an important human-in-the-loop step: the model proposes an identity, while the user can review it before current-market lookup.
+
+### Phase 6: Current-price search
+
+The price-search flow starts from the Results page.
+
+1. The user enters a market or location, defaulting to India.
+2. The app checks whether brand, product name, and model number are all present.
+3. If all three are available, the request is treated as an exact-match search.
+4. If the model number is missing or unverified, the request is treated as a comparable-product search.
+5. `search_product_prices()` sends the product identity, location, and match mode to Foundry.
+6. The Responses API is instructed to use hosted web search.
+7. Search is restricted to configured retail domains such as Amazon India, Flipkart, Croma, and Reliance Digital.
+8. The returned answer is stored in `st.session_state.web_search_result`.
+9. The result is rendered below the search button.
+
+The application deliberately distinguishes exact matches from comparisons so that a similar product is not presented as the same product.
+
+### Phase 7: Product Q&A
+
+The Q&A flow is implemented in `components/qa.py`.
+
+1. The user enters a question or selects a suggested question.
+2. The question is stored as a user message in session state.
+3. `_is_product_question()` checks whether the question is related to the uploaded product.
+4. If the question is unrelated, the app returns: `I can only answer questions about the uploaded product.`
+5. If the question is product-related, the app checks for web-search terms.
+6. Questions about appearance, visible attributes, material, color, shape, or features call `answer_product_question()`.
+7. Questions about price, availability, retailers, comparison, alternatives, or similar products call `answer_web_question()`.
+8. The answer is appended to the Q&A history with a source label.
+9. Streamlit reruns and displays the conversation.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant Q as components/qa.py
+    participant S as services/ai_service.py
+    participant F as Microsoft Foundry
+
+    U->>Q: Submit question
+    Q->>Q: Product-topic filter
+    alt Unrelated question
+        Q-->>U: Product-only refusal
+    else Product detail question
+        Q->>S: answer_product_question(image, question)
+        S->>F: Responses API with image
+        F-->>S: Image-grounded answer
+        S-->>Q: Answer
+        Q-->>U: Display image-analysis answer
+    else Current market question
+        Q->>S: answer_web_question(identity, question)
+        S->>F: Responses API with web search
+        F-->>S: Current-information answer
+        S-->>Q: Answer
+        Q-->>U: Display web-search answer
+    end
+```
+
+### Phase 8: History and reset
+
+History is session-scoped rather than database-backed.
+
+- After a successful analysis, `upload.py` creates a history entry and inserts it at index zero.
+- `history.py` displays the available entries.
+- Selecting an entry copies its analysis into `st.session_state.analysis`.
+- The previous result can be reopened without uploading the image again in the current session.
+- **New analysis** calls `reset_analysis()` in `components/state.py`.
+- Reset clears the active analysis, image bytes, MIME type, Q&A messages, and price-search output.
+
+### Complete data lifecycle
+
+```mermaid
+flowchart TB
+    IMG[Uploaded image] --> VALIDATE[Format and size validation]
+    VALIDATE --> BYTES[Image bytes and MIME type]
+    BYTES --> ENCODE[Base64 data URL]
+    ENCODE --> API[Foundry Responses API]
+    API --> JSON[Strict analysis JSON]
+    JSON --> STATE[st.session_state.analysis]
+    STATE --> RESULT[Results renderer]
+    STATE --> HISTORY[Session history]
+    BYTES --> QA[Image-based Q&A]
+    STATE --> IDENTITY[Editable product identity]
+    IDENTITY --> SEARCH[Price and web search]
+    SEARCH --> WEBRESULT[Web-search result]
+    WEBRESULT --> STATE
+```
+
+### Suggested presentation script
+
+Use the following script when explaining the project:
+
+> “AI Product Visualizer is a Streamlit application for extracting useful product insights from an image. When the application starts, `app.py` initializes the page configuration, session state, theme, sidebar, and selected page. The user begins on the Dashboard and navigates to Analyze Product.
+>
+> On the upload page, the user selects a JPG, JPEG, PNG, or WebP image. The application validates the format, confirms that the image is readable, enforces the 10 MB limit, and shows a preview before any AI call is made.
+>
+> When the user clicks Analyze product, the upload component sends the image bytes to the service layer. The service layer reads the Microsoft Foundry endpoint, API key, and model name from secure configuration. It converts the image into a data URL and sends it to the Foundry Responses API with analysis instructions and a strict JSON schema.
+>
+> The model is instructed to use visible evidence only. It must not guess hidden specifications or unreadable model numbers. The response contains an overview, product identity, visual attributes, description, confidence score, confidently identified details, and details that cannot be determined.
+>
+> After the response is validated, the application stores it in Streamlit session state and adds it to the current session history. The Results page then displays the image, overview, editable identity fields, confidence meter, attribute chips, generated description, and uncertainty information.
+>
+> The user can correct the detected identity before searching current prices. If brand, product name, and model number are available, the application can request an exact-match search. If the model number is missing, the application explicitly labels the results as comparable products.
+>
+> The user can also ask questions. Product-appearance questions are answered from the uploaded image. Current questions about price, availability, retailers, or comparisons are routed through Foundry web search. Unrelated questions are filtered and refused so the assistant remains focused on the uploaded product.
+>
+> Finally, the user can reopen analyses from the current session history or start a new analysis. The project uses Microsoft Foundry for model access, the Responses API for structured output, and hosted web search for current market information. Responsible-AI controls are applied through evidence-only instructions, uncertainty fields, confidence scores, topic filtering, exact-match labeling, input validation, and secure credential handling.”
+
+### File-by-file execution map
+
+| Runtime event | File | Responsibility |
+| --- | --- | --- |
+| App starts | `app.py` | Configure Streamlit and route pages. |
+| Session initializes | `components/state.py` | Create and reset user session values. |
+| Navigation click | `components/sidebar.py` | Change the active page and theme mode. |
+| Upload selected | `components/upload.py` | Validate, preview, and read image bytes. |
+| Analyze clicked | `components/upload.py` | Call the analysis service and save the result. |
+| AI analysis request | `services/ai_service.py` | Build the Foundry client, prompt, image input, and schema. |
+| Results shown | `components/results.py` | Render structured analysis and identity editing. |
+| Price search clicked | `components/results.py` and `services/ai_service.py` | Search current market information. |
+| Q&A submitted | `components/qa.py` | Filter and route questions. |
+| History selected | `components/history.py` | Restore a session analysis. |
+| Theme applied | `components/theme.py` and `.streamlit/config.toml` | Control colors, layout styling, and Streamlit settings. |
 
 ## Architecture
 
