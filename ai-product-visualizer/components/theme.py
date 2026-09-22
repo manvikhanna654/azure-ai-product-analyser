@@ -437,14 +437,6 @@ hr, [data-testid="stDivider"] { border-color: var(--border); }
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
-  [data-testid="stFileUploaderDropzone"] button p,
-  [data-testid="stFileUploaderDropzone"] button span {
-    display: inline-block !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
   [data-testid="stImage"] img,
   .pv-thumb {
     max-width: 100%;
