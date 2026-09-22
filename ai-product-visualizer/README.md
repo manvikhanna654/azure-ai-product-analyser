@@ -25,6 +25,7 @@ The application can:
 - [Configuration and secrets](#configuration-and-secrets)
 - [Using the application](#using-the-application)
 - [Analysis response contract](#analysis-response-contract)
+- [Responsible AI and Azure services](#responsible-ai-and-azure-services)
 - [Deploy to Streamlit Community Cloud](#deploy-to-streamlit-community-cloud)
 - [Troubleshooting](#troubleshooting)
 - [Development guide](#development-guide)
@@ -335,6 +336,46 @@ The Foundry vision request uses a strict JSON schema. The expected top-level res
 ```
 
 The schema and prompt are defined in `services/ai_service.py`. If the response contract changes, update the schema and result renderer together.
+
+## Responsible AI and Azure services
+
+This project is designed to provide useful product insights while making uncertainty visible and limiting the system to its intended purpose. The responsible-AI controls are implemented across the application prompt, response schema, question router, and market-search presentation.
+
+### Guardrails currently implemented
+
+| Guardrail | Implementation | User benefit |
+| --- | --- | --- |
+| Evidence-only analysis | The Foundry system instruction tells the model to report only what can reasonably be determined from the image. | Reduces invented specifications, dimensions, model numbers, brand details, and performance claims. |
+| Explicit uncertainty | The response schema includes `cannot_determine`; unreadable model numbers must be returned as empty instead of guessed. | Makes missing or uncertain information visible. |
+| Confidence display | Every analysis includes a confidence label and a score from 0 to 100. | Helps users judge how much to rely on the result. |
+| Product-only Q&A | The application filters unrelated topics such as programming, homework, politics, sports, recipes, and lyrics. | Keeps the assistant within its intended product-analysis scope. |
+| Separate image and web reasoning | Visible product questions use the uploaded image; current price and availability questions use web search. | Reduces confusion between visual evidence and changing market information. |
+| Exact-match protection | A market search is marked as exact only when brand, product name, and model number are available. Otherwise results are labeled comparable or not exact. | Prevents similar products from being presented as the identified product. |
+| Input validation | Uploads are limited to supported image formats and 10 MB. | Reduces malformed input and resource-abuse risk. |
+| Secret protection | API credentials are loaded from local environment variables or deployment secrets and are excluded from Git. | Keeps credentials out of source code and the user interface. |
+
+### Microsoft Azure and Foundry capabilities used
+
+The application uses a Microsoft Foundry project endpoint through the OpenAI-compatible Responses API:
+
+```text
+{FOUNDRY_PROJECT_ENDPOINT}/openai/v1/responses
+```
+
+The configured Azure service capabilities are:
+
+1. **Microsoft Foundry project endpoint** — provides the project-scoped model access and authentication boundary.
+2. **Vision-capable Foundry model** — analyzes the uploaded product image and returns the strict structured JSON contract documented above.
+3. **Responses API structured output** — constrains analysis responses to the required schema.
+4. **Hosted web search tool** — supports current price, retailer, availability, and comparable-product questions.
+
+The integration is centralized in `services/ai_service.py`. The application does not expose the API key to the browser.
+
+### Responsible-use expectations
+
+AI output should be treated as an assistive estimate, not as proof of identity, authenticity, safety, compliance, warranty, or technical specifications. Users should verify important information against the manufacturer or retailer, especially before making a purchase or safety-related decision. Current prices and availability can change after a result is generated.
+
+The current repository implements application-level guardrails and Foundry prompt/schema controls. A separate Azure AI Content Safety moderation call is not currently wired into the codebase; it should be added if the product is expanded to accept free-form user content or support higher-risk use cases.
 
 ## Deploy to Streamlit Community Cloud
 
