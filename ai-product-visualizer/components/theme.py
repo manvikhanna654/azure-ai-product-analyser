@@ -411,8 +411,39 @@ hr, [data-testid="stDivider"] { border-color: var(--border); }
   [data-testid="stFileUploaderDropzone"] {
     padding: 1.35rem .8rem;
   }
+  [data-testid="stFileUploaderDropzone"] > div,
+  [data-testid="stFileUploaderDropzone"] section {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .65rem !important;
+    width: 100% !important;
+  }
   [data-testid="stFileUploaderDropzoneInstructions"] {
+    display: block !important;
+    width: 100% !important;
     text-align: center;
+  }
+  [data-testid="stFileUploaderDropzone"] button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 8.5rem !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  [data-testid="stFileUploaderDropzone"] button p,
+  [data-testid="stFileUploaderDropzone"] button span {
+    display: inline-block !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
   [data-testid="stImage"] img,
   .pv-thumb {
