@@ -194,8 +194,12 @@ final price.
 """
     response = client.responses.create(
         model=model,
-        tools=[{"type": "web_search", "filters": {"allowed_domains": ["amazon.in", "flipkart.com", "croma.com", "reliancedigital.in"]}}],
-        tool_choice="required",
+        tools=[{"type": "web_search"}],
+        # Let Foundry select the hosted search tool when the prompt requires
+        # current market data. This is the supported Responses API pattern
+        # and avoids rejecting deployments that do not accept a forced tool
+        # choice for web search.
+        tool_choice="auto",
         include=["web_search_call.action.sources"],
         input=prompt,
     )
@@ -223,7 +227,7 @@ def answer_web_question(
     response = client.responses.create(
         model=model,
         tools=[{"type": "web_search"}],
-        tool_choice="required",
+        tool_choice="auto",
         include=["web_search_call.action.sources"],
         input=(
             f"You must use web search, not the image alone, to answer this question about {identity_text}.{location_hint}\n\n"

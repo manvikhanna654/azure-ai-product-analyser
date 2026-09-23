@@ -144,8 +144,11 @@ p, span, li, label { color: var(--text); }
 
 .pv-chip {
   display: inline-flex; align-items: center; gap: .45rem;
-  background: #1A212B; border: 1px solid var(--border); border-radius: 8px;
-  padding: .34rem .66rem; font-size: .8rem; margin: 0 .4rem .45rem 0;
+  background: #1A212B; color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: .34rem .66rem; font-size: .8rem; margin: 0 .4rem .45rem 0;
+}
+.stApp:has(.pv-light-marker) .pv-chip {
+  background: #FFFFFF; color: #172033; border-color: #D9E0EA;
 }
 .pv-swatch { width: 11px; height: 11px; border-radius: 3px; border: 1px solid rgba(255,255,255,.18); }
 

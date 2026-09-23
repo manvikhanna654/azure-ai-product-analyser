@@ -128,7 +128,7 @@ def render_results() -> None:
     st.markdown(
         f"""
         <div class="pv-card" style="padding:1.5rem 1.7rem">
-          <p style="font-size:.95rem;line-height:1.75;color:#DCE2EA;max-width:74ch">
+          <p style="font-size:.95rem;line-height:1.75;color:var(--text);max-width:74ch">
             {analysis['description']}
           </p>
           <div style="margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--border)">
