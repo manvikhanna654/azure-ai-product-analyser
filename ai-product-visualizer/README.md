@@ -697,7 +697,3 @@ Before opening a pull request, verify that no `.env` or secrets file is staged, 
 - Price and availability information changes over time and can vary by location, taxes, shipping, seller, and condition.
 - Uploaded image bytes and analysis state are held in the active Streamlit session. The application does not provide durable database storage.
 - API keys are server-side configuration values. Never print them, expose them in the UI, commit them, or include them in screenshots or logs.
-
-## License
-
-No license has been specified for this repository. Add a license file before distributing or reusing the project outside its intended environment.
